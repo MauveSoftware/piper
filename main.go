@@ -10,7 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const version = "0.1.1"
+const version = "0.1.2"
 
 func main() {
 	version := flag.Bool("version", false, "Shows version info")

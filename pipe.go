@@ -62,6 +62,10 @@ func (p *pipe) pefixMatches(pfx *net.IPNet) bool {
 		return false
 	}
 
+	if pfx == p.prefix {
+		return true
+	}
+
 	return pfx.String() == p.prefix.String()
 }
 
