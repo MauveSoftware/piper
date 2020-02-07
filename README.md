@@ -20,7 +20,7 @@ pipes:
 
 ### Starting
 ```
-./piper -config /path/to/config/file
+./piper -config-file /path/to/config/file
 ```
 
 ## Third party libraries
