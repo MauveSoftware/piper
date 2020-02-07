@@ -13,7 +13,7 @@ import (
 const proto int = 252
 
 type pipe struct {
-	prefix      net.IPNet
+	prefix      *net.IPNet
 	sourceTable int
 	targetTable int
 
@@ -22,8 +22,16 @@ type pipe struct {
 }
 
 func newPipe(prefix net.IPNet, sourceTable int, targetTable int) *pipe {
+	var pfx = &prefix
+
+	o, _ := pfx.Mask.Size()
+	if o == 0 {
+		// default route
+		pfx = nil
+	}
+
 	return &pipe{
-		prefix:      prefix,
+		prefix:      pfx,
 		sourceTable: sourceTable,
 		targetTable: targetTable,
 	}
@@ -34,7 +42,7 @@ func (p *pipe) processUpdate(u netlink.RouteUpdate) error {
 		return nil
 	}
 
-	if u.Dst == nil || u.Dst.String() != p.prefix.String() {
+	if !p.pefixMatches(u.Dst) {
 		return nil
 	}
 
@@ -43,6 +51,18 @@ func (p *pipe) processUpdate(u netlink.RouteUpdate) error {
 	}
 
 	return p.processAdd(u)
+}
+
+func (p *pipe) pefixMatches(pfx *net.IPNet) bool {
+	if p.prefix == nil && pfx != nil {
+		return false
+	}
+
+	if pfx == nil && p.prefix != nil {
+		return false
+	}
+
+	return pfx.String() == p.prefix.String()
 }
 
 func (p *pipe) processAdd(u netlink.RouteUpdate) error {
@@ -106,10 +126,6 @@ func (p *pipe) processRemoveInTarget(u netlink.RouteUpdate) error {
 }
 
 func (p *pipe) routeEqual(r1, r2 netlink.Route) bool {
-	if r1.Dst != r2.Dst {
-		return false
-	}
-
 	if !r1.Gw.Equal(r2.Gw) {
 		return false
 	}
