@@ -46,7 +46,7 @@ func main() {
 }
 
 func printVersion() {
-	fmt.Println("route-pipe")
+	fmt.Println("piper")
 	fmt.Printf("Version: %s\n", version)
 	fmt.Println("Author(s): Daniel Czerwonk")
 	fmt.Println("Copyright: 2020, Mauve Mailorder Software GmbH & Co. KG, Licensed under MIT license")
