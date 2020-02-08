@@ -86,11 +86,6 @@ func (p *pipe) processAdd(u netlink.RouteUpdate) error {
 }
 
 func (p *pipe) processAddInSource(u netlink.RouteUpdate) error {
-	old := p.currentSource
-	if old != nil && p.routeEqual(*old, u.Route) {
-		return nil
-	}
-
 	logrus.Infof("Netlink added route in source table: %v", u.Route)
 	p.currentSource = &u.Route
 
@@ -102,11 +97,6 @@ func (p *pipe) processAddInSource(u netlink.RouteUpdate) error {
 }
 
 func (p *pipe) processAddInTarget(u netlink.RouteUpdate) error {
-	old := p.curentTarget
-	if old != nil && p.routeEqual(*old, u.Route) {
-		return nil
-	}
-
 	logrus.Infof("Netlink added route in target table: %v", u.Route)
 	p.curentTarget = &u.Route
 
