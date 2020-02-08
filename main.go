@@ -10,7 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const version = "0.1.2"
+const version = "0.1.3"
 
 func main() {
 	version := flag.Bool("version", false, "Shows version info")
@@ -68,7 +68,7 @@ func loadPipesFromConfig(path string) ([]*pipe, error) {
 		}
 
 		logrus.Infof("Configure pipe: %v", p)
-		pipes = append(pipes, newPipe(*pfx, p.Source, p.Target))
+		pipes = append(pipes, newPipe(*pfx, p.Source, p.Target, cfg.Proto))
 	}
 
 	return pipes, nil

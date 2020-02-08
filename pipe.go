@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"net"
+	"sync"
 	"time"
 
 	"github.com/pkg/errors"
@@ -10,18 +12,19 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-const proto int = 252
-
 type pipe struct {
 	prefix      *net.IPNet
 	sourceTable int
 	targetTable int
+	proto       int
 
 	currentSource *netlink.Route
 	curentTarget  *netlink.Route
+
+	mu *sync.Mutex
 }
 
-func newPipe(prefix net.IPNet, sourceTable int, targetTable int) *pipe {
+func newPipe(prefix net.IPNet, sourceTable int, targetTable int, proto int) *pipe {
 	var pfx = &prefix
 
 	o, _ := pfx.Mask.Size()
@@ -34,10 +37,15 @@ func newPipe(prefix net.IPNet, sourceTable int, targetTable int) *pipe {
 		prefix:      pfx,
 		sourceTable: sourceTable,
 		targetTable: targetTable,
+		proto:       proto,
+		mu:          &sync.Mutex{},
 	}
 }
 
 func (p *pipe) processUpdate(u netlink.RouteUpdate) error {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
 	if u.Table != p.sourceTable && u.Table != p.targetTable {
 		return nil
 	}
@@ -78,6 +86,11 @@ func (p *pipe) processAdd(u netlink.RouteUpdate) error {
 }
 
 func (p *pipe) processAddInSource(u netlink.RouteUpdate) error {
+	old := p.currentSource
+	if old != nil && p.routeEqual(*old, u.Route) {
+		return nil
+	}
+
 	logrus.Infof("Netlink added route in source table: %v", u.Route)
 	p.currentSource = &u.Route
 
@@ -89,6 +102,11 @@ func (p *pipe) processAddInSource(u netlink.RouteUpdate) error {
 }
 
 func (p *pipe) processAddInTarget(u netlink.RouteUpdate) error {
+	old := p.curentTarget
+	if old != nil && p.routeEqual(*old, u.Route) {
+		return nil
+	}
+
 	logrus.Infof("Netlink added route in target table: %v", u.Route)
 	p.curentTarget = &u.Route
 
@@ -115,7 +133,7 @@ func (p *pipe) processRemoveInTarget(u netlink.RouteUpdate) error {
 	logrus.Infof("Netlink removed route in target table: %v", u.Route)
 	p.curentTarget = nil
 
-	if u.Protocol == proto {
+	if u.Protocol == p.proto {
 		go func() {
 			<-time.After(1 * time.Second)
 			source := p.currentSource
@@ -138,6 +156,14 @@ func (p *pipe) routeEqual(r1, r2 netlink.Route) bool {
 		return false
 	}
 
+	if r1.Priority != r2.Priority {
+		return false
+	}
+
+	if r1.LinkIndex != r2.LinkIndex {
+		return false
+	}
+
 	return true
 }
 
@@ -145,7 +171,7 @@ func (p *pipe) replaceRoute(r netlink.Route) error {
 	logrus.Infof("Replacing route: %v", r)
 
 	new := &r
-	new.Protocol = proto
+	new.Protocol = p.proto
 	new.Table = p.targetTable
 	err := netlink.RouteReplace(new)
 	if err != nil {
@@ -153,4 +179,12 @@ func (p *pipe) replaceRoute(r netlink.Route) error {
 	}
 
 	return nil
+}
+
+func (p *pipe) String() string {
+	if p.prefix == nil {
+		return fmt.Sprintf("default from %d to %d", p.sourceTable, p.targetTable)
+	}
+
+	return fmt.Sprintf("%s from %d to %d", p.prefix.String(), p.sourceTable, p.targetTable)
 }

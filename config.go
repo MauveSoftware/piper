@@ -7,8 +7,11 @@ import (
 	"github.com/pkg/errors"
 )
 
+const defaultProto = 252
+
 // Config represents the config file
 type Config struct {
+	Proto int
 	Pipes []PipeConfig
 }
 
@@ -25,7 +28,9 @@ func loadConfig(path string) (*Config, error) {
 		return nil, errors.Wrap(err, "could not open config file")
 	}
 
-	cfg := &Config{}
+	cfg := &Config{
+		Proto: defaultProto,
+	}
 	err = yaml.Unmarshal(b, cfg)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not parse config file")
