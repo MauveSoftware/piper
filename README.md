@@ -12,7 +12,7 @@ go get github.com/MauveSoftware/piper
 If we want to pipe the prefix 1.1.1.1/32 learned in table 42 to the main table:
 
 ```yaml
-proto: 252
+proto: 188 
 pipes:
 - prefix: 1.1.1.1/32
   source: 42
