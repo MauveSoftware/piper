@@ -7,7 +7,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/vishvananda/netlink"
-	"golang.org/x/sys/unix"
 
 	"contrib.go.opencensus.io/exporter/prometheus"
 	"go.opencensus.io/stats"
@@ -66,52 +65,53 @@ func views() []*view.View {
 			Description: mRouteUpdatesProcessed.Description(),
 			Aggregation: view.Count(),
 			Measure:     mRouteUpdatesProcessed,
+			TagKeys:     []tag.Key{keyPipeName, keyRouteUpdateType},
 		},
 		&view.View{
 			Name:        mRouteUpdatesReceived.Name(),
 			Description: mRouteUpdatesReceived.Description(),
 			Aggregation: view.Count(),
 			Measure:     mRouteUpdatesReceived,
+			TagKeys:     []tag.Key{keyRouteUpdateType},
 		},
 		&view.View{
 			Name:        mRoutesReplaceSuccess.Name(),
 			Description: mRoutesReplaceSuccess.Description(),
 			Aggregation: view.Count(),
 			Measure:     mRoutesReplaceSuccess,
+			TagKeys:     []tag.Key{keyPipeName},
 		},
 		&view.View{
 			Name:        mRoutesReplaceError.Name(),
 			Description: mRoutesReplaceError.Description(),
 			Aggregation: view.Count(),
 			Measure:     mRoutesReplaceError,
+			TagKeys:     []tag.Key{keyPipeName},
 		},
 	}
 }
 
 func recordRouteUpdateReceived(ctx context.Context, u *netlink.RouteUpdate) {
-	ctx, _ = tag.New(ctx, tag.Insert(keyRouteUpdateType, updateType(u)))
-	stats.Record(ctx, mRouteUpdatesReceived.M(1))
+	stats.RecordWithTags(ctx, []tag.Mutator{
+		tag.Insert(keyRouteUpdateType, routeUpdateType(u)),
+	}, mRouteUpdatesReceived.M(1))
 }
 
 func recordRouteUpdateProcessed(ctx context.Context, u *netlink.RouteUpdate, p *pipe) {
-	ctx, _ = tag.New(ctx, tag.Insert(keyRouteUpdateType, updateType(u)), tag.Insert(keyPipeName, p.name))
-	stats.Record(ctx, mRouteUpdatesProcessed.M(1))
+	stats.RecordWithTags(ctx, []tag.Mutator{
+		tag.Insert(keyPipeName, p.name),
+		tag.Insert(keyRouteUpdateType, routeUpdateType(u)),
+	}, mRouteUpdatesProcessed.M(1))
 }
 
 func recordRouteReplaced(ctx context.Context, p *pipe) {
-	ctx, _ = tag.New(ctx, tag.Insert(keyPipeName, p.name))
-	stats.Record(ctx, mRoutesReplaceSuccess.M(1))
+	stats.RecordWithTags(ctx, []tag.Mutator{
+		tag.Insert(keyPipeName, p.name),
+	}, mRoutesReplaceSuccess.M(1))
 }
 
 func recordRouteReplaceError(ctx context.Context, p *pipe) {
-	ctx, _ = tag.New(ctx, tag.Insert(keyPipeName, p.name))
-	stats.Record(ctx, mRoutesReplaceError.M(1))
-}
-
-func updateType(u *netlink.RouteUpdate) string {
-	if u.Type == unix.RTM_DELROUTE {
-		return "delete"
-	}
-
-	return "add"
+	stats.RecordWithTags(ctx, []tag.Mutator{
+		tag.Insert(keyPipeName, p.name),
+	}, mRoutesReplaceError.M(1))
 }

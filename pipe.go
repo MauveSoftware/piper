@@ -9,7 +9,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/vishvananda/netlink"
-	"golang.org/x/sys/unix"
 )
 
 type pipe struct {
@@ -58,7 +57,7 @@ func (p *pipe) processUpdate(ctx context.Context, u netlink.RouteUpdate) error {
 
 	defer recordRouteUpdateProcessed(ctx, &u, p)
 
-	if u.Type == unix.RTM_DELROUTE {
+	if isRouteDel(&u) {
 		return p.processRemove(ctx, u)
 	}
 

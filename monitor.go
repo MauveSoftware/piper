@@ -52,13 +52,13 @@ func (m *monitor) start() error {
 }
 
 func (m *monitor) processUpdate(u netlink.RouteUpdate) {
-	logrus.Debug("Got route update", u)
+	logrus.Debug("Got route update ", u)
 
 	ctx := context.Background()
 	recordRouteUpdateReceived(ctx, &u)
 
 	for _, p := range m.pipes {
-		logrus.Debug("Processing pipe: ", p.name)
+		logrus.Debug("Processing pipe ", p.name)
 		err := p.processUpdate(ctx, u)
 		if err != nil {
 			logrus.Errorf("Error on route update: %v", err)
