@@ -41,6 +41,7 @@ func startMetricEndpoint(listenAddress string) error {
 	go func() {
 		mux := http.NewServeMux()
 		mux.Handle("/metrics", pe)
+		logrus.Infof("Listening for metrics calls on /metrics at %s", listenAddress)
 		if err := http.ListenAndServe(listenAddress, mux); err != nil {
 			logrus.Errorf("Failed to run Prometheus scrape endpoint: %v", err)
 		}

@@ -14,7 +14,8 @@ If we want to pipe the prefix 1.1.1.1/32 learned in table 42 to the main table:
 ```yaml
 proto: 188 
 pipes:
-- prefix: 1.1.1.1/32
+- name: "dns"
+  prefix: 1.1.1.1/32
   source: 42
   target: 254
 ```
@@ -25,7 +26,7 @@ pipes:
 ```
 
 ## Metrics
-For monitoring purposes Piper exposes a prometheus compatible endpoint. The default port is 10080.
+Piper provides a prometheus metrics endpoint on default port :10080
 
 ## Third party libraries
 * Netlink Go Library (https://github.com/vishvananda/netlink)

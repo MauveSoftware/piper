@@ -181,12 +181,12 @@ func (p *pipe) replaceRoute(ctx context.Context, r netlink.Route) error {
 func (p *pipe) String() string {
 	name := ""
 	if p.name != "" {
-		name = p.name + ": "
+		return name
 	}
 
 	if p.prefix == nil {
-		return name + fmt.Sprintf("default from %d to %d", p.sourceTable, p.targetTable)
+		return fmt.Sprintf("default from %d to %d", p.sourceTable, p.targetTable)
 	}
 
-	return name + fmt.Sprintf("from %d to %d", p.prefix.String(), p.sourceTable, p.targetTable)
+	return fmt.Sprintf("%s from %d to %d", p.prefix.String(), p.sourceTable, p.targetTable)
 }

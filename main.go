@@ -16,7 +16,7 @@ func main() {
 	version := flag.Bool("version", false, "Shows version info")
 	configFile := flag.String("config-file", "config.yml", "Path to config file")
 	debug := flag.Bool("debug", false, "Enables debug output")
-	metricsEndpoint = flag.String("metrics-endpoint", ":10080", "Endopint for scraping metrics")
+	metricsEndpoint := flag.String("metrics-endpoint", ":10080", "Endopint for scraping metrics")
 
 	flag.Parse()
 
