@@ -15,6 +15,7 @@ type Config struct {
 
 // PipeConfig represent the config for a single pipe
 type PipeConfig struct {
+	Name   string
 	Prefix string
 	Source int
 	Target int

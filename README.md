@@ -24,6 +24,9 @@ pipes:
 ./piper -config-file /path/to/config/file
 ```
 
+## Metrics
+For monitoring purposes Piper exposes a prometheus compatible endpoint. The default port is 10080.
+
 ## Third party libraries
 * Netlink Go Library (https://github.com/vishvananda/netlink)
 

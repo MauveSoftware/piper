@@ -10,12 +10,13 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const version = "0.1.3"
+const version = "0.2.0"
 
 func main() {
 	version := flag.Bool("version", false, "Shows version info")
 	configFile := flag.String("config-file", "config.yml", "Path to config file")
 	debug := flag.Bool("debug", false, "Enables debug output")
+	metricsEndpoint = flag.String("metrics-endpoint", ":10080", "Endopint for scraping metrics")
 
 	flag.Parse()
 
@@ -36,6 +37,11 @@ func main() {
 	if len(pipes) == 0 {
 		logrus.Info("No pipes defined.")
 		os.Exit(0)
+	}
+
+	err = startMetricEndpoint(*metricsEndpoint)
+	if err != nil {
+		logrus.Fatal(err)
 	}
 
 	m := newMonitor(pipes)
@@ -68,7 +74,7 @@ func loadPipesFromConfig(path string) ([]*pipe, error) {
 		}
 
 		logrus.Infof("Configure pipe: %v", p)
-		pipes = append(pipes, newPipe(*pfx, p.Source, p.Target, cfg.Proto))
+		pipes = append(pipes, newPipe(p.Name, *pfx, p.Source, p.Target, cfg.Proto))
 	}
 
 	return pipes, nil
