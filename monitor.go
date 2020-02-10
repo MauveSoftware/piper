@@ -58,7 +58,7 @@ func (m *monitor) processUpdate(u netlink.RouteUpdate) {
 	recordRouteUpdateReceived(ctx, &u)
 
 	for _, p := range m.pipes {
-		logrus.Debug("Processing pipe: ", p)
+		logrus.Debug("Processing pipe: ", p.name)
 		err := p.processUpdate(ctx, u)
 		if err != nil {
 			logrus.Errorf("Error on route update: %v", err)

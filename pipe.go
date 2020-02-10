@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"sync"
 	"time"
@@ -176,17 +175,4 @@ func (p *pipe) replaceRoute(ctx context.Context, r netlink.Route) error {
 
 	recordRouteReplaced(ctx, p)
 	return nil
-}
-
-func (p *pipe) String() string {
-	name := ""
-	if p.name != "" {
-		return name
-	}
-
-	if p.prefix == nil {
-		return fmt.Sprintf("default from %d to %d", p.sourceTable, p.targetTable)
-	}
-
-	return fmt.Sprintf("%s from %d to %d", p.prefix.String(), p.sourceTable, p.targetTable)
 }

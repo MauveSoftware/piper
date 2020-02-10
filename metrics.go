@@ -16,10 +16,11 @@ import (
 )
 
 var (
-	mRouteUpdatesProcessed = stats.Float64("route/updates_processed_count", "Number of route updates processed by pipe", "")
-	mRouteUpdatesReceived  = stats.Float64("route/updates_received_count", "Number of route updates received from netlink", "")
-	mRoutesReplaceSuccess  = stats.Float64("route/replace_success_count", "Number of piper route changes", "")
-	mRoutesReplaceError    = stats.Float64("route/replace_error_count", "Number of failed piper route changes", "")
+	mUp                    = stats.Float64("up", "Returns 1 if piper is running", "")
+	mRouteUpdatesProcessed = stats.Float64("route/update/processed_count", "Number of route updates processed by pipe", "")
+	mRouteUpdatesReceived  = stats.Float64("route/update/received_count", "Number of route updates received from netlink", "")
+	mRoutesReplaceSuccess  = stats.Float64("route/replace/success_count", "Number of piper route changes", "")
+	mRoutesReplaceError    = stats.Float64("route/replace/error_count", "Number of failed piper route changes", "")
 
 	keyPipeName, _        = tag.NewKey("pipe")
 	keyRouteUpdateType, _ = tag.NewKey("type")
@@ -38,6 +39,8 @@ func startMetricEndpoint(listenAddress string) error {
 		return errors.Wrap(err, "could not register views for Prometheus metrics")
 	}
 
+	stats.Record(context.Background(), mUp.M(1))
+
 	go func() {
 		mux := http.NewServeMux()
 		mux.Handle("/metrics", pe)
@@ -52,6 +55,12 @@ func startMetricEndpoint(listenAddress string) error {
 
 func views() []*view.View {
 	return []*view.View{
+		&view.View{
+			Name:        mUp.Name(),
+			Description: mUp.Description(),
+			Aggregation: view.LastValue(),
+			Measure:     mUp,
+		},
 		&view.View{
 			Name:        mRouteUpdatesProcessed.Name(),
 			Description: mRouteUpdatesProcessed.Description(),
