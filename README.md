@@ -1,3 +1,6 @@
+[![CircleCI](https://circleci.com/gh/MauveSoftware/piper.svg?style=shield)](https://circleci.com/gh/MauveSoftware/piper)
+[![Go Report Card](https://goreportcard.com/badge/github.com/mauvesoftware/piper)](https://goreportcard.com/report/github.com/mauvesoftware/piper)
+
 # piper
 Pipe routing information from one routing table to another using netlink
 
