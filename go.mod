@@ -9,6 +9,6 @@ require (
 	github.com/sirupsen/logrus v1.4.2
 	github.com/vishvananda/netlink v1.1.0
 	go.opencensus.io v0.22.3
-	golang.org/x/sys v0.0.0-20190606203320-7fc4e5ec1444
+	golang.org/x/sys v0.1.0
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
