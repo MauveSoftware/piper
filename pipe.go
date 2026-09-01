@@ -132,7 +132,9 @@ func (p *pipe) processRemoveInTarget(ctx context.Context, u netlink.RouteUpdate)
 			source := p.currentSource
 			if source != nil && p.curentTarget == nil {
 				logrus.Infof("Restoring route: %v", source)
-				p.replaceRoute(ctx, *source)
+				if err := p.replaceRoute(ctx, *source); err != nil {
+					logrus.Errorf("could not restore route: %v", err)
+				}
 			}
 		}()
 	}

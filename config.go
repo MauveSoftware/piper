@@ -23,7 +23,7 @@ type PipeConfig struct {
 }
 
 func loadConfig(path string) (*Config, error) {
-	b, err := os.ReadFile(path)
+	b, err := os.ReadFile(path) // #nosec G304 -- path is provided by the operator via the -config-file flag, not attacker controlled
 	if err != nil {
 		return nil, errors.Wrap(err, "could not open config file")
 	}

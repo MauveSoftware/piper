@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -13,6 +14,8 @@ import (
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/tag"
 )
+
+const metricsServerTimeout = 10 * time.Second
 
 var (
 	mUp                    = stats.Float64("up", "Returns 1 if piper is running", "")
@@ -43,8 +46,15 @@ func startMetricEndpoint(listenAddress string) error {
 	go func() {
 		mux := http.NewServeMux()
 		mux.Handle("/metrics", pe)
+		srv := &http.Server{
+			Addr:         listenAddress,
+			Handler:      mux,
+			ReadTimeout:  metricsServerTimeout,
+			WriteTimeout: metricsServerTimeout,
+			IdleTimeout:  metricsServerTimeout,
+		}
 		logrus.Infof("Listening for metrics calls on /metrics at %s", listenAddress)
-		if err := http.ListenAndServe(listenAddress, mux); err != nil {
+		if err := srv.ListenAndServe(); err != nil {
 			logrus.Errorf("Failed to run Prometheus scrape endpoint: %v", err)
 		}
 	}()
@@ -92,26 +102,38 @@ func views() []*view.View {
 }
 
 func recordRouteUpdateReceived(ctx context.Context, u *netlink.RouteUpdate) {
-	stats.RecordWithTags(ctx, []tag.Mutator{
+	err := stats.RecordWithTags(ctx, []tag.Mutator{
 		tag.Insert(keyRouteUpdateType, routeUpdateType(u)),
 	}, mRouteUpdatesReceived.M(1))
+	if err != nil {
+		logrus.Errorf("could not record metric %s: %v", mRouteUpdatesReceived.Name(), err)
+	}
 }
 
 func recordRouteUpdateProcessed(ctx context.Context, u *netlink.RouteUpdate, p *pipe) {
-	stats.RecordWithTags(ctx, []tag.Mutator{
+	err := stats.RecordWithTags(ctx, []tag.Mutator{
 		tag.Insert(keyPipeName, p.name),
 		tag.Insert(keyRouteUpdateType, routeUpdateType(u)),
 	}, mRouteUpdatesProcessed.M(1))
+	if err != nil {
+		logrus.Errorf("could not record metric %s: %v", mRouteUpdatesProcessed.Name(), err)
+	}
 }
 
 func recordRouteReplaced(ctx context.Context, p *pipe) {
-	stats.RecordWithTags(ctx, []tag.Mutator{
+	err := stats.RecordWithTags(ctx, []tag.Mutator{
 		tag.Insert(keyPipeName, p.name),
 	}, mRoutesReplaceSuccess.M(1))
+	if err != nil {
+		logrus.Errorf("could not record metric %s: %v", mRoutesReplaceSuccess.Name(), err)
+	}
 }
 
 func recordRouteReplaceError(ctx context.Context, p *pipe) {
-	stats.RecordWithTags(ctx, []tag.Mutator{
+	err := stats.RecordWithTags(ctx, []tag.Mutator{
 		tag.Insert(keyPipeName, p.name),
 	}, mRoutesReplaceError.M(1))
+	if err != nil {
+		logrus.Errorf("could not record metric %s: %v", mRoutesReplaceError.Name(), err)
+	}
 }
