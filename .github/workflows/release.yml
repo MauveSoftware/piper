@@ -1,0 +1,13 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    uses: czerwonk/go-ci/.github/workflows/release.yml@v2

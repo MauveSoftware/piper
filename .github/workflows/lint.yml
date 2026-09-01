@@ -1,0 +1,16 @@
+name: Lint
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    uses: czerwonk/go-ci/.github/workflows/lint.yml@v2

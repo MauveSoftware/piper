@@ -34,7 +34,7 @@ func (m *monitor) start() error {
 		return errors.Wrap(err, "could not subscribe to netlink for route changes")
 	}
 
-	term := make(chan os.Signal)
+	term := make(chan os.Signal, 1)
 	signal.Notify(term, syscall.SIGINT, syscall.SIGTERM)
 
 	logrus.Info("Listening for routing update")

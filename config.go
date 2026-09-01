@@ -1,15 +1,16 @@
 package main
 
 import (
-	"io/ioutil"
+	"os"
 
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
+	"github.com/vishvananda/netlink"
 )
 
 // Config represents the config file
 type Config struct {
-	Proto int
+	Proto netlink.RouteProtocol
 	Pipes []PipeConfig
 }
 
@@ -22,7 +23,7 @@ type PipeConfig struct {
 }
 
 func loadConfig(path string) (*Config, error) {
-	b, err := ioutil.ReadFile(path)
+	b, err := os.ReadFile(path)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not open config file")
 	}

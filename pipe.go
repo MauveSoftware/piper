@@ -16,7 +16,7 @@ type pipe struct {
 	prefix      *net.IPNet
 	sourceTable int
 	targetTable int
-	proto       int
+	proto       netlink.RouteProtocol
 
 	currentSource *netlink.Route
 	curentTarget  *netlink.Route
@@ -24,7 +24,7 @@ type pipe struct {
 	mu *sync.Mutex
 }
 
-func newPipe(name string, prefix net.IPNet, sourceTable int, targetTable int, proto int) *pipe {
+func newPipe(name string, prefix net.IPNet, sourceTable int, targetTable int, proto netlink.RouteProtocol) *pipe {
 	var pfx = &prefix
 
 	o, _ := pfx.Mask.Size()
@@ -131,7 +131,7 @@ func (p *pipe) processRemoveInTarget(ctx context.Context, u netlink.RouteUpdate)
 			<-time.After(1 * time.Second)
 			source := p.currentSource
 			if source != nil && p.curentTarget == nil {
-				logrus.Infof("Restoring route: &v", source)
+				logrus.Infof("Restoring route: %v", source)
 				p.replaceRoute(ctx, *source)
 			}
 		}()
