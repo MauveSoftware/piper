@@ -1,6 +1,6 @@
 module github.com/MauveSoftware/piper
 
-go 1.26.9
+go 1.26.10
 
 require (
 	contrib.go.opencensus.io/exporter/prometheus v0.4.2
@@ -19,7 +19,7 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/prometheus/client_golang v1.25.0 // indirect
 	github.com/prometheus/client_model v0.6.3 // indirect
-	github.com/prometheus/common v0.72.0 // indirect
+	github.com/prometheus/common v0.72.1 // indirect
 	github.com/prometheus/procfs v0.22.0 // indirect
 	github.com/prometheus/statsd_exporter v0.31.0 // indirect
 	github.com/vishvananda/netns v0.0.5 // indirect
