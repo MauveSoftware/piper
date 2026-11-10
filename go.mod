@@ -1,6 +1,6 @@
 module github.com/MauveSoftware/piper
 
-go 1.26.10
+go 1.26.11
 
 require (
 	contrib.go.opencensus.io/exporter/prometheus v0.4.2
